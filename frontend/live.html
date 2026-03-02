@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Live Surveillance</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="app">
+
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-badge">AI</div>
+        <div>
+          <h1>Smart Surveillance</h1>
+          <p>YOLO • Flask • Live Stream</p>
+        </div>
+      </div>
+
+      <div class="sys-status">
+        <span class="dot"></span>
+        <span>System Online</span>
+      </div>
+
+      <p class="nav-label">Navigation</p>
+      <nav class="nav">
+        <a href="index.html"><span>Dashboard</span><span class="pill">HOME</span></a>
+        <a class="active" href="live.html"><span>Live Feed</span><span class="pill">CCTV</span></a>
+        <a href="history.html"><span>History</span><span class="pill">LOGS</span></a>
+        <a href="alerts.html"><span>Alerts</span><span class="pill">RISK</span></a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <p>SURVEILLANCE SYSTEM v2.0</p>
+      </div>
+    </aside>
+
+    <main class="main">
+      <div class="topbar">
+        <div class="page-title">
+          <h2>Live Surveillance</h2>
+          <p>Real-time camera stream with on-frame AI detection.</p>
+        </div>
+        <div class="status-chip"><span class="dot"></span> System Active</div>
+      </div>
+
+      <section class="live-layout">
+
+        <div class="card feed">
+          <div class="feed-header">
+            <div class="left">
+              <strong>Camera 01 — Primary</strong>
+              <span>Stream: /video_feed &nbsp;|&nbsp; 127.0.0.1:5000</span>
+            </div>
+            <span class="badge safe">● LIVE</span>
+          </div>
+
+          <div class="feed-body">
+            <img src="http://127.0.0.1:5000/video_feed" alt="Live feed">
+          </div>
+
+          <div class="feed-footer">
+            <span>CAM_01 &nbsp;/&nbsp; YOLO DETECTION ACTIVE</span>
+            <div class="rec"><span class="rec-dot"></span> REC</div>
+          </div>
+        </div>
+
+        <div class="card panel">
+          <h3>Operations Panel</h3>
+          <div class="list">
+            <div class="list-item">
+              <span>Press <b>CTRL + C</b> to stop backend server</span>
+              <span class="badge">INFO</span>
+            </div>
+            <div class="list-item">
+              <span>Show a <b>phone</b> to trigger alert test</span>
+              <span class="badge alert">TEST</span>
+            </div>
+            <div class="list-item">
+              <span>History syncs from <b>/detections</b> API</span>
+              <span class="badge">API</span>
+            </div>
+          </div>
+        </div>
+
+      </section>
+    </main>
+  </div>
+</body>
+</html>
