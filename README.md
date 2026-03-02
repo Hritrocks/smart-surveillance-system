@@ -34,7 +34,3 @@ smart-surveillance
 │  
 ├── run_project.bat  
 └── .gitignore  
-
-## How to Run
-
-### 1️⃣ Start Backend
