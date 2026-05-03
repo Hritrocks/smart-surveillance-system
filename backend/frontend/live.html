@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Live Surveillance</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="app">
+
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-badge">AI</div>
+        <div>
+          <h1>Smart Surveillance</h1>
+          <p>YOLO • Flask • Live Stream</p>
+        </div>
+      </div>
+
+      <div class="sys-status">
+        <span class="dot"></span>
+        <span>System Online</span>
+      </div>
+
+      <p class="nav-label">Navigation</p>
+      <nav class="nav">
+        <a href="index.html"><span>Dashboard</span><span class="pill">HOME</span></a>
+        <a class="active" href="live.html"><span>Live Feed</span><span class="pill">CCTV</span></a>
+        <a href="history.html"><span>History</span><span class="pill">LOGS</span></a>
+        <a href="alerts.html"><span>Alerts</span><span class="pill">RISK</span></a>
+      </nav>
+
+      <!-- THREAT SCORE WIDGET in sidebar -->
+      <div class="threat-widget" id="threatWidget">
+        <div class="threat-label">AI THREAT SCORE</div>
+        <div class="threat-score-ring">
+          <svg viewBox="0 0 80 80" class="ring-svg">
+            <circle cx="40" cy="40" r="32" class="ring-bg"/>
+            <circle cx="40" cy="40" r="32" class="ring-fill" id="ringFill"/>
+          </svg>
+          <div class="threat-score-value" id="threatScore">0</div>
+        </div>
+        <div class="threat-level" id="threatLevel">LOW</div>
+        <div class="threat-reason" id="threatReason">No threats detected</div>
+      </div>
+
+      <div class="sidebar-footer">
+        <p>SURVEILLANCE SYSTEM v3.0</p>
+      </div>
+    </aside>
+
+    <main class="main">
+      <div class="topbar">
+        <div class="page-title">
+          <h2>Live Surveillance</h2>
+          <p>Real-time camera stream with on-frame AI detection.</p>
+        </div>
+        <div class="status-chip"><span class="dot"></span> System Active</div>
+      </div>
+
+      <section class="live-layout">
+
+        <div class="card feed">
+          <div class="feed-header">
+            <div class="left">
+              <strong>Camera 01 — Primary</strong>
+              <span>Stream: /video_feed &nbsp;|&nbsp; AI Threat Analysis Active</span>
+            </div>
+            <span class="badge safe">● LIVE</span>
+          </div>
+
+          <div class="feed-body">
+            <img src="http://127.0.0.1:5000/video_feed" alt="Live feed">
+          </div>
+
+          <div class="feed-footer">
+            <span>CAM_01 &nbsp;/&nbsp; YOLO DETECTION ACTIVE</span>
+            <div class="rec"><span class="rec-dot"></span> REC</div>
+          </div>
+        </div>
+
+        <div class="card panel">
+          <h3>Operations Panel</h3>
+
+          <!-- Live Threat Breakdown -->
+          <div class="threat-breakdown" id="threatBreakdown">
+            <div class="breakdown-title">THREAT BREAKDOWN</div>
+            <div class="breakdown-row">
+              <span>Detected Objects</span>
+              <span id="bdObjects">—</span>
+            </div>
+            <div class="breakdown-row">
+              <span>Persons Nearby</span>
+              <span id="bdPersons">0</span>
+            </div>
+            <div class="breakdown-row">
+              <span>Threat Level</span>
+              <span id="bdLevel" class="bd-level">LOW</span>
+            </div>
+          </div>
+
+          <div class="list" style="margin-top:14px;">
+            <div class="list-item">
+              <span>Press <b>CTRL + C</b> to stop backend server</span>
+              <span class="badge">INFO</span>
+            </div>
+            <div class="list-item">
+              <span>Show a <b>knife/gun</b> to test threat score</span>
+              <span class="badge alert">TEST</span>
+            </div>
+            <div class="list-item">
+              <span>Threat score updates every <b>2 seconds</b></span>
+              <span class="badge">API</span>
+            </div>
+          </div>
+        </div>
+
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const BACKEND = "http://127.0.0.1:5000";
+
+    // Ring circumference for r=32: 2 * PI * 32 = ~201
+    const CIRCUMFERENCE = 2 * Math.PI * 32;
+    const ringFill = document.getElementById("ringFill");
+    ringFill.style.strokeDasharray = CIRCUMFERENCE;
+    ringFill.style.strokeDashoffset = CIRCUMFERENCE;
+
+    function updateRing(score) {
+      const offset = CIRCUMFERENCE - (score / 100) * CIRCUMFERENCE;
+      ringFill.style.strokeDashoffset = offset;
+    }
+
+    function getLevelColor(level) {
+      switch(level) {
+        case "CRITICAL": return "#ff3c5a";
+        case "WARNING":  return "#ffaa00";
+        case "ELEVATED": return "#00d2ff";
+        default:         return "#00ff9d";
+      }
+    }
+
+    async function fetchThreat() {
+      try {
+        const res = await fetch(`${BACKEND}/threat`);
+        const data = await res.json();
+
+        const score = data.score || 0;
+        const level = data.level || "LOW";
+        const reason = data.reason || "No threats detected";
+        const objects = data.objects || [];
+        const persons = data.person_count || 0;
+
+        // Update score number
+        document.getElementById("threatScore").textContent = score;
+
+        // Update ring color + fill
+        const color = getLevelColor(level);
+        ringFill.style.stroke = color;
+        updateRing(score);
+
+        // Update level badge
+        const levelEl = document.getElementById("threatLevel");
+        levelEl.textContent = level;
+        levelEl.style.color = color;
+        levelEl.style.borderColor = color;
+
+        // Update reason
+        document.getElementById("threatReason").textContent = reason;
+
+        // Update widget border glow
+        const widget = document.getElementById("threatWidget");
+        widget.style.borderColor = color + "66";
+        widget.style.boxShadow = `0 0 18px ${color}22`;
+
+        // Update breakdown panel
+        document.getElementById("bdObjects").textContent = objects.length > 0 ? objects.join(", ") : "None";
+        document.getElementById("bdPersons").textContent = persons;
+        const bdLevel = document.getElementById("bdLevel");
+        bdLevel.textContent = level;
+        bdLevel.style.color = color;
+
+      } catch(e) {
+        // Backend not reachable
+      }
+    }
+
+    fetchThreat();
+    setInterval(fetchThreat, 2000);
+  </script>
+</body>
+</html>

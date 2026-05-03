@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Dashboard - Smart Surveillance</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-badge">AI</div>
+      <div>
+        <h1>Smart Surveillance</h1>
+        <p>YOLO • Flask • Live Stream</p>
+      </div>
+    </div>
+    <div class="sys-status">
+      <span class="dot"></span>
+      <span>System Online</span>
+    </div>
+    <p class="nav-label">Navigation</p>
+    <nav class="nav">
+      <a class="active" href="index.html"><span>Dashboard</span><span class="pill">HOME</span></a>
+      <a href="live.html"><span>Live Feed</span><span class="pill">CCTV</span></a>
+      <a href="history.html"><span>History</span><span class="pill">LOGS</span></a>
+      <a href="alerts.html"><span>Alerts</span><span class="pill">RISK</span></a>
+    </nav>
+    <div class="sidebar-footer"><p>SURVEILLANCE SYSTEM v3.0</p></div>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <div class="page-title">
+        <h2>Dashboard</h2>
+        <p>System overview and live AI threat assessment.</p>
+      </div>
+      <div class="status-chip"><span class="dot"></span> System Active</div>
+    </div>
+
+    <!-- Stat Cards -->
+    <div class="grid-4">
+      <div class="card">
+        <h3>Total Detections</h3>
+        <div class="value" id="totalDetections">—</div>
+        <div class="sub">Last 200 frames</div>
+      </div>
+      <div class="card">
+        <h3>Active Cameras</h3>
+        <div class="value">1</div>
+        <div class="sub">CAM_01 Online</div>
+      </div>
+      <div class="card">
+        <h3>Total Alerts</h3>
+        <div class="value" id="totalAlerts">—</div>
+        <div class="sub">Dangerous objects</div>
+      </div>
+      <div class="card" id="threatCard">
+        <h3>Live Threat Score</h3>
+        <div class="value" id="dashThreatScore">0</div>
+        <div class="sub" id="dashThreatLevel">Level: LOW</div>
+      </div>
+    </div>
+
+    <!-- Threat Reason Banner -->
+    <div class="card" style="margin-top:16px; padding: 16px 20px;">
+      <h3>AI Threat Assessment</h3>
+      <div style="margin-top:12px; font-family: var(--font-mono); font-size:13px; color: var(--text-secondary);" id="dashThreatReason">
+        Initializing threat analysis engine...
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+  const BACKEND = "http://127.0.0.1:5000";
+
+  function getScoreColor(score) {
+    if (score >= 70) return "#ff3c5a";
+    if (score >= 40) return "#ffaa00";
+    if (score > 0)   return "#00d2ff";
+    return "#00ff9d";
+  }
+
+  async function loadDashboard() {
+    try {
+      const [detRes, alertRes, threatRes] = await Promise.all([
+        fetch(`${BACKEND}/detections`),
+        fetch(`${BACKEND}/alerts`),
+        fetch(`${BACKEND}/threat`),
+      ]);
+
+      const dets = await detRes.json();
+      const alerts = await alertRes.json();
+      const threat = await threatRes.json();
+
+      document.getElementById("totalDetections").textContent = dets.length;
+      document.getElementById("totalAlerts").textContent = alerts.length;
+
+      const score = threat.score || 0;
+      const level = threat.level || "LOW";
+      const color = getScoreColor(score);
+
+      const scoreEl = document.getElementById("dashThreatScore");
+      scoreEl.textContent = score;
+      scoreEl.style.color = color;
+
+      const levelEl = document.getElementById("dashThreatLevel");
+      levelEl.textContent = `Level: ${level}`;
+      levelEl.style.color = color;
+
+      document.getElementById("dashThreatReason").textContent = threat.reason || "No threats detected";
+
+      const card = document.getElementById("threatCard");
+      card.style.borderColor = color + "55";
+
+    } catch(e) {
+      document.getElementById("dashThreatReason").textContent = "Backend not reachable. Please start the Flask server.";
+    }
+  }
+
+  loadDashboard();
+  setInterval(loadDashboard, 2000);
+</script>
+
+</body>
+</html>

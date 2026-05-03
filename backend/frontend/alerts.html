@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Alerts - Smart Surveillance</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-badge">AI</div>
+      <div>
+        <h1>Smart Surveillance</h1>
+        <p>YOLO • Flask • Live Stream</p>
+      </div>
+    </div>
+    <div class="sys-status">
+      <span class="dot"></span>
+      <span>System Online</span>
+    </div>
+    <p class="nav-label">Navigation</p>
+    <nav class="nav">
+      <a href="index.html"><span>Dashboard</span><span class="pill">HOME</span></a>
+      <a href="live.html"><span>Live Feed</span><span class="pill">CCTV</span></a>
+      <a href="history.html"><span>History</span><span class="pill">LOGS</span></a>
+      <a class="active" href="alerts.html"><span>Alerts</span><span class="pill">RISK</span></a>
+    </nav>
+    <div class="sidebar-footer"><p>SURVEILLANCE SYSTEM v3.0</p></div>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <div class="page-title">
+        <h2>Alerts</h2>
+        <p>Dangerous object detections with AI Threat Score assessment.</p>
+      </div>
+      <div class="status-chip"><span class="dot"></span> System Active</div>
+    </div>
+
+    <div class="card table-card">
+      <div class="table-head">
+        <strong>Alert Log</strong>
+        <span id="alertCount">Loading...</span>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>Object</th>
+            <th>Confidence</th>
+            <th>Time</th>
+            <th>Threat Score</th>
+            <th>Threat Level</th>
+          </tr>
+        </thead>
+        <tbody id="alerts-body">
+        </tbody>
+      </table>
+    </div>
+  </main>
+</div>
+
+<script>
+  const BACKEND = "http://127.0.0.1:5000";
+
+  function getLevelClass(level) {
+    switch(level) {
+      case "CRITICAL": return "badge alert";
+      case "WARNING":  return "badge warning";
+      case "ELEVATED": return "badge";
+      default:         return "badge safe";
+    }
+  }
+
+  function getScoreColor(score) {
+    if (score >= 70) return "#ff3c5a";
+    if (score >= 40) return "#ffaa00";
+    if (score > 0)   return "#00d2ff";
+    return "#00ff9d";
+  }
+
+  async function loadAlerts() {
+    try {
+      const res = await fetch(`${BACKEND}/alerts`);
+      const data = await res.json();
+      const tbody = document.getElementById("alerts-body");
+      const countEl = document.getElementById("alertCount");
+
+      countEl.textContent = `${data.length} alert(s) recorded`;
+      tbody.innerHTML = "";
+
+      if (data.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;color:var(--text-dim);padding:24px;">No alerts yet. Show a dangerous object to the camera.</td></tr>`;
+        return;
+      }
+
+      [...data].reverse().forEach(item => {
+        const score = item.threat_score || 0;
+        const level = item.threat_level || "ELEVATED";
+        const color = getScoreColor(score);
+        const row = `
+          <tr>
+            <td><b style="color:var(--red)">${item.object}</b></td>
+            <td>${(item.confidence * 100).toFixed(0)}%</td>
+            <td>${item.time}</td>
+            <td>
+              <span style="
+                font-family: var(--font-hud);
+                font-size: 18px;
+                font-weight: 700;
+                color: ${color};
+              ">${score}<span style="font-size:11px;opacity:0.6">/100</span></span>
+            </td>
+            <td><span class="${getLevelClass(level)}">${level}</span></td>
+          </tr>
+        `;
+        tbody.innerHTML += row;
+      });
+    } catch(e) {
+      document.getElementById("alerts-body").innerHTML =
+        `<tr><td colspan="5" style="text-align:center;color:var(--text-dim);padding:24px;">Backend not reachable. Start Flask server.</td></tr>`;
+    }
+  }
+
+  loadAlerts();
+  setInterval(loadAlerts, 2000);
+</script>
+
+</body>
+</html>

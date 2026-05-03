@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Detection History - Smart Surveillance</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!-- Navbar -->
+<audio id="alertSound"></audio>
+<div class="navbar">
+    <h1>Smart Surveillance System</h1>
+    <ul>
+        <li><a href="index.html">Dashboard</a></li>
+        <li><a href="live.html">Live</a></li>
+        <li><a href="history.html">History</a></li>
+        <li><a href="alerts.html">Alerts</a></li>
+    </ul>
+</div>
+
+<!-- Container -->
+<div class="container">
+
+    <h2>Detection History</h2>
+
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Object</th>
+                    <th>Confidence</th>
+                    <th>Time</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+
+            <tbody id="history-body">
+                <!-- Data will load here automatically -->
+            </tbody>
+
+        </table>
+    </div>
+
+</div>
+
+<script src="js/script.js"></script>
+
+</body>
+</html>
